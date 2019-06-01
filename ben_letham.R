@@ -11,6 +11,7 @@
 ##
 library(data.table)
 library(ggplot2)
+library(prophet)
 ## 
 rm(list=ls())
 ##
@@ -20,7 +21,7 @@ setwd('c:/Users/davidjayjackson/Documents/GitHub/Emacs/')
 sidc <-fread("http://sidc.be/silso/DATA/SN_d_tot_V2.0.csv",sep = ';')
 colnames(sidc) <- c("Year","Month","Day", "Fdate","Spots", "Sd","Obs" ,"Defin"  )
 sidc$Ymd <- as.Date(paste(sidc$Year, sidc$Month, sidc$Day, sep = "-"))
-df<-sidc[Year>=1900 & Year <=2018,.(Ymd,Spots),]
+df<-sidc[Year>=1900 & Year <=2019,.(Ymd,Spots),]
 colnames(df) <- c("ds","y")
 ## data <-sidc
 summary(df)
