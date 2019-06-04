@@ -19,11 +19,15 @@ rm(list=ls())
 ## Set Working Directory
 setwd('c:/Users/davidjayjackson/Documents/GitHub/Emacs/')
 ## Download latest data from SIDC
-sidc <-fread("http://sidc.be/silso/DATA/SN_d_tot_V2.0.csv",sep = ';')
-colnames(sidc) <- c("Year","Month","Day", "Fdate","Spots", "Sd","Obs" ,"Defin"  )
-sidc$Ymd <- as.Date(paste(sidc$Year, sidc$Month, sidc$Day, sep = "-"))
-df<-sidc[Year>=1900 & Year <=2019,.(Ymd,Spots),]
-colnames(df) <- c("ds","y")
+
+df <-fread("./Data/lyman_alpha.csv")
+str(df)
+df$Year <- substr(df$YYDD,0,4)
+df$Day <-substr(df$YYDD,5,7)
+df$Year <- as.numyeric(df$Year)
+# df<-df[Year>=1900 & Year <=2019,.(Ymd,Spots),]
+# colnames(df) <- c("ds","y")
+
 ## data <-sidc
 summary(df)
 ##
@@ -32,11 +36,11 @@ summary(df)
 m <- prophet(seasonality.mode="multiplicative")
 m <- add_seasonality(m, name="cycle_11year", period=365.25 * 11,fourier.order=5)
 m <- fit.prophet(m, df)
-future <- make_future_dataframe(m,periods=2000,freq="day")
+future <- make_future_dataframe(m,periods=200,freq="day")
 forecast <- predict(m, future)
  plot(m, forecast)
 ## Update kanzel (sqlite3) database
-db <- dbConnect(SQLite(), dbname="../db/solar.sqlite3")
+db <- dbConnect(SQLite(), dbname="../db/kanzel.sqlite3")
 forecast$ds <- as.character(forecast$ds)
-dbWriteTable(db,"blsidc",forecast, row.names=FALSE,overwrite=TRUE)
+dbWriteTable(db,"prophet",forecast, row.names=FALSE,overwrite=TRUE)
 dbListTables(db)

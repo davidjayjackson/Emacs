@@ -22,11 +22,15 @@ setwd('c:/Users/davidjayjackson/Documents/GitHub/Emacs/')
 sidc <-fread("http://sidc.be/silso/DATA/SN_d_tot_V2.0.csv",sep = ';')
 colnames(sidc) <- c("Year","Month","Day", "Fdate","Spots", "Sd","Obs" ,"Defin"  )
 sidc$Ymd <- as.Date(paste(sidc$Year, sidc$Month, sidc$Day, sep = "-"))
-df<-sidc[Year>=1900 & Year <=2019,.(Ymd,Spots),]
+df<-sidc[Year>=1945 & Year <=2019,.(Ymd,Spots),]
 colnames(df) <- c("ds","y")
 ## data <-sidc
 summary(df)
-##
+db <- dbConnect(SQLite(), dbname="../db/solar.sqlite3")
+df$ds <- as.character(df$ds)
+dbWriteTable(db,"sidc",df, row.names=FALSE,overwrite=TRUE)
+df$ds <- as.Date(df$ds)
+dbListTables(db)
 ## Beginning of Ben's Prophet code
 ##
 m <- prophet(seasonality.mode="multiplicative")
@@ -34,7 +38,7 @@ m <- add_seasonality(m, name="cycle_11year", period=365.25 * 11,fourier.order=5)
 m <- fit.prophet(m, df)
 future <- make_future_dataframe(m,periods=2000,freq="day")
 forecast <- predict(m, future)
- plot(m, forecast)
+plot(m, forecast)
 ## Update kanzel (sqlite3) database
 db <- dbConnect(SQLite(), dbname="../db/solar.sqlite3")
 forecast$ds <- as.character(forecast$ds)

@@ -19,12 +19,11 @@ rm(list=ls())
 ## Set Working Directory
 setwd('c:/Users/davidjayjackson/Documents/GitHub/Emacs/')
 ## Download latest data from SIDC
-sidc <-fread("http://sidc.be/silso/DATA/SN_d_tot_V2.0.csv",sep = ';')
-colnames(sidc) <- c("Year","Month","Day", "Fdate","Spots", "Sd","Obs" ,"Defin"  )
-sidc$Ymd <- as.Date(paste(sidc$Year, sidc$Month, sidc$Day, sep = "-"))
-df<-sidc[Year>=1900 & Year <=2019,.(Ymd,Spots),]
-colnames(df) <- c("ds","y")
-## data <-sidc
+df <-fread("./Data/bremen.csv")
+str(df)
+colnames(df) <- c("ds","y","Uncert", "Source" )
+df$ds <- as.Date(df$ds)
+df<-df[ ds <="2019-01-01",.(ds,y),]
 summary(df)
 ##
 ## Beginning of Ben's Prophet code
@@ -36,7 +35,7 @@ future <- make_future_dataframe(m,periods=2000,freq="day")
 forecast <- predict(m, future)
  plot(m, forecast)
 ## Update kanzel (sqlite3) database
-db <- dbConnect(SQLite(), dbname="../db/solar.sqlite3")
+db <- dbConnect(SQLite(), dbname="../db/kanzel.sqlite3")
 forecast$ds <- as.character(forecast$ds)
-dbWriteTable(db,"blsidc",forecast, row.names=FALSE,overwrite=TRUE)
+dbWriteTable(db,"prophet",forecast, row.names=FALSE,overwrite=TRUE)
 dbListTables(db)
