@@ -53,8 +53,8 @@ ggplot(data=forecast2,aes(x=ds,y=yhat)) +geom_line() + geom_smooth() +
 # ggplot(data=forecast2,aes(x=ds,y=yhat)) +geom_line() + geom_smooth() +
 #   ggtitle("SIDC Sunspots Prediction: Jan. 2019 - May 31, 2021")
 ## Update sidc (sqlite3) database
-# db <- dbConnect(SQLite(), dbname="../db/solar.sqlite3")
+ db <- dbConnect(SQLite(), dbname="../db/solar.sqlite3")
 # forecast$ds <- as.character(forecast$ds)
-# dbWriteTable(db,"blsidc",forecast, row.names=FALSE,overwrite=TRUE)
+dbWriteTable(db,"blsidc",forecast, row.names=FALSE,overwrite=TRUE)
 # dbWriteTable(db,"m",m, row.names=FALSE,overwrite=TRUE)
-# dbListTables(db)
+dbListTables(db)

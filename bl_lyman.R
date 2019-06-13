@@ -20,11 +20,12 @@ rm(list=ls())
 setwd('c:/Users/davidjayjackson/Documents/GitHub/Emacs/')
 ## Download latest data from SIDC
 
-df <-fread("./Data/lyman_alpha.csv")
+df <-fread("../db/lyman.csv")
 str(df)
-df$Year <- substr(df$YYDD,0,4)
-df$Day <-substr(df$YYDD,5,7)
-df$Year <- as.numyeric(df$Year)
+df$Year <- substr(df$YYYYDD,0,4)
+df$Day <-substr(df$YYYYDD,5,7)
+df$Year <- as.numeric(df$Year)
+df$Day <- as.numeric(df$Day)
 # df<-df[Year>=1900 & Year <=2019,.(Ymd,Spots),]
 # colnames(df) <- c("ds","y")
 
@@ -40,7 +41,7 @@ future <- make_future_dataframe(m,periods=200,freq="day")
 forecast <- predict(m, future)
  plot(m, forecast)
 ## Update kanzel (sqlite3) database
-db <- dbConnect(SQLite(), dbname="../db/kanzel.sqlite3")
-forecast$ds <- as.character(forecast$ds)
-dbWriteTable(db,"prophet",forecast, row.names=FALSE,overwrite=TRUE)
+db <- dbConnect(SQLite(), dbname="../db/solar.sqlite3")
+# $ds <- as.character(forecast$ds)
+dbWriteTable(db,"lyman",df, row.names=FALSE,overwrite=TRUE)
 dbListTables(db)

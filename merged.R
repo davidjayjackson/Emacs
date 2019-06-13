@@ -20,7 +20,7 @@ kanzel$Ymd <- as.Date(kanzel$Ymd)
 sidc$Ymd <- as.Date(sidc$Ymd)
 aavso$Ymd <- as.Date(aavso$Ymd)
 ## Begin Merging df.
-merged.aa <- merge(sidc,aavso,all.x=TRUE)
+merged.aa <- merge(key,aavso,all.y=TRUE)
 merged.ab <- merge(merged.aa,kanzel,all.x=TRUE)
 merged.ab$Ymd <-as.Date(merged.ab$Ymd)
 ## Write merged table to db
