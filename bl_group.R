@@ -14,7 +14,6 @@ library(ggplot2)
 library(prophet)
 library(plotly)
 library(RSQLite)
-library(lubridate)
 
 ## 
 rm(list=ls())
@@ -22,34 +21,31 @@ rm(list=ls())
 ## Set Working Directory
 setwd('c:/Users/davidjayjackson/Documents/R/Emacs/')
 ## Download latest data from SIDC
-aavso <-fread("https://www.aavso.org/sites/default/files/solar/NOAAfiles/NOAAdaily.csv")
+aavso <-fread("../db/gndb.csv")
+aavso$Day <- 15
 aavso$Ymd <- as.Date(paste(aavso$Year, aavso$Month, aavso$Day, sep = "-"))
-##
-
-db <- dbConnect(SQLite(),dbname="../db/solar.sqlite3")
-aavso$Ymd <- as.character(aavso$Ymd)
-dbWriteTable(db,"aavso",aavso,overwrite=TRUE)
-##
-aavso<-aavso[Ymd>="1945-01-01",.(Ymd,Ra),]
+# aavso<-aavso[Ymd>="1945-01-01",.(Ymd,g),]
 df <- aavso
+df <- df[,.(Ymd,g)]
 colnames(df) <- c("ds", "y"  )
-summary(df)
+str(df)
 
 ##
 ## Beginning of Ben's Prophet code
 ##
 m <- prophet(seasonality.mode="multiplicative")
-m <- add_seasonality(m, name="cycle_11year", period=365.25 * 11,fourier.order=5)
+m <- add_seasonality(m, name="cycle_11year", period=364.25 * 11,fourier.order=5)
 m <- fit.prophet(m, df)
-future <- make_future_dataframe(m,periods=4000,freq="day")
+future <- make_future_dataframe(m,periods=12000,freq="day")
 forecast <- predict(m, future)
-plot(m,forecast) +ggtitle("NOAA/AAVSO Sunspot Predictions:1945 - 2025")
+p <-plot(m,forecast) +ggtitle("AAVSO Group Sunspot Predictions:1610 - 2025")
 ##
 ## Subplot of forecast table: 2014 - 2025
 forecast1 <- as.data.table(forecast)
-forecast1 <- forecast1[ds >="2014-01-01",]
-ggplot(data=forecast1,aes(x=ds,y=yhat)) + geom_line() + geom_smooth() + 
-  ggtitle("AAVSO Current Mimimum: 2014 - 2030")
+forecast1 <- forecast1[ds >="1850-01-01",]
+p <-ggplot(data=forecast1,aes(x=ds,y=yhat)) + geom_line() + geom_smooth() + 
+  ggtitle("AAVSO(Groups) Current Mimimum: 2014 - 2030")
+ggplotly(p)
 ##
 library(RSQLite)
 db <- dbConnect(SQLite(),dbname="../db/solar.sqlite3")
